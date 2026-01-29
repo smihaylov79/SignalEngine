@@ -1,0 +1,14 @@
+{
+    "max_depth": 5,
+    "learning_rate": 0.12851967683044088,
+    "n_estimators": 355,
+    "subsample": 0.6090659603951465,
+    "colsample_bytree": 0.9971926320524792,
+    "min_child_weight": 7.451260978518437,
+    "gamma": 0.3188335318615711,
+    "horizon": 21,
+    "sl_mult": 2.3910993454479907,
+    "tp_mult": 1.9755460655942731,
+    "conf_threshold": 0.5211021488763093,
+    "atr_norm_threshold": 0.0014334777972587315
+}

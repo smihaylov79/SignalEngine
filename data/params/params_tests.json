@@ -1,0 +1,17 @@
+{
+  "29-01-2026": {
+    "max_depth": 5,
+    "learning_rate": 0.023389089488232092,
+    "n_estimators": 740,
+    "subsample": 0.8157814072932649,
+    "colsample_bytree": 0.9757754832706621,
+    "min_child_weight": 7.752800512157089,
+    "gamma": 2.587466756893696,
+    "horizon": 22,
+    "sl_mult": 2.27137850243454,
+    "tp_mult": 2.594143888149664,
+    "conf_threshold": 0.6052655402784821,
+    "atr_norm_threshold": 0.0008066672861893836
+  }
+}
+
