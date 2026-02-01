@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 from config import settings as cfg
 from features.pipeline import build_features
-from live.mt5_client import init_mt5, get_mt5_rates
+from live.mt5_client import init_mt5, get_mt5_rates, get_bars
 from models.registry import generate_signals  # your existing function
 from models.live_loader import load_live_model
 from execution.broker import open_position, close_all_if_needed  # you’ll wire these
@@ -27,10 +27,13 @@ def live_trading_loop():
     last_bar_time = None
 
     while True:
-        now = datetime.utcnow()
-        lookback_start = get_lookback_start(now)
+        # now = datetime.utcnow()
+        # lookback_start = get_lookback_start(now)
+        #
+        # df_raw = get_mt5_rates(cfg.SYMBOL, cfg.TIMEFRAME, lookback_start, now)
 
-        df_raw = get_mt5_rates(cfg.SYMBOL, cfg.TIMEFRAME, lookback_start, now)
+        df_raw = get_bars(cfg.SYMBOL, cfg.TIMEFRAME, n=300)
+
         if df_raw is None or df_raw.empty:
             time.sleep(5)
             continue

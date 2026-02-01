@@ -57,9 +57,39 @@ def get_mt5_rates(symbol: str, timeframe, start_date, end_date, days=None) -> pd
     return df
 
 
-def get_bars(symbol, timeframe, n=500):
-    # TODO: implement MT5 copy_rates_from_pos
-    pass
+def get_bars(symbol: str, timeframe: str, n: int = 500) -> pd.DataFrame:
+    timeframe_map = {
+        "M1": mt5.TIMEFRAME_M1,
+        "M5": mt5.TIMEFRAME_M5,
+        "M15": mt5.TIMEFRAME_M15,
+        "M30": mt5.TIMEFRAME_M30,
+        "H1": mt5.TIMEFRAME_H1,
+        "H4": mt5.TIMEFRAME_H4,
+        "D1": mt5.TIMEFRAME_D1
+    }
+
+    tf = timeframe_map.get(timeframe)
+    if tf is None:
+        raise ValueError(f"Unsupported timeframe: {timeframe}")
+
+    # Ensure symbol is selected
+    mt5.symbol_select(symbol, True)
+
+    # Fetch last n bars
+    rates = mt5.copy_rates_from_pos(symbol, tf, 0, n)
+
+    if rates is None or len(rates) == 0:
+        raise RuntimeError(f"Failed to load bars for {symbol}: {mt5.last_error()}")
+
+    df = pd.DataFrame(rates)
+    df["time"] = pd.to_datetime(df["time"], unit="s")
+    df.set_index("time", inplace=True)
+
+    # Convert to local timezone (your existing logic)
+    df.index = df.index.tz_localize("UTC").tz_convert(LOCAL_TZ)
+
+    return df[["open", "high", "low", "close"]]
+
 
 
 def place_order(symbol, direction, volume, sl, tp):
