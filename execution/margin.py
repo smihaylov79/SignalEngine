@@ -1,5 +1,7 @@
 import MetaTrader5 as mt5
 
+from utils.logging import log_event
+
 
 def compute_required_margin(symbol, direction: int, volume: float):
     """
@@ -29,6 +31,12 @@ def margin_allowed(required_margin: float, direction: int, margin_limit: float) 
     available_long = allowed_margin - long_used
     available_short = allowed_margin - short_used
 
+    log_event(
+        f"MARGIN_ALLOWED_CHECK | dir={'LONG' if direction == 1 else 'SHORT'} | "
+        f"req={required_margin:.2f} | allowed={allowed_margin:.2f} | "
+        f"long_used={long_used:.2f} | short_used={short_used:.2f}"
+    )
+
     if direction == 1:   # LONG
         return required_margin <= available_long
 
@@ -36,7 +44,6 @@ def margin_allowed(required_margin: float, direction: int, margin_limit: float) 
         return required_margin <= available_short
 
     return False
-
 
 
 def get_position_margin(p):

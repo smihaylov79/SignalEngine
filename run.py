@@ -1,4 +1,12 @@
+from pathlib import Path
+import os
+import webbrowser
+
 import pandas as pd
+
+from dashboard.generate_dashboard import basic_summary, generate_db_file, generate_dashboard
+from dashboard.html_report import generate_html_report
+from dashboard.metrics import add_confidence_bucket, profit_by_confidence, profit_by_conf_and_direction
 
 from live.live_trader import live_trading_loop
 from live.mt5_client import init_mt5, get_mt5_rates
@@ -7,6 +15,7 @@ from models.train import train_model
 from backtesting.reports import run_backtest, plot_equity
 from pipeline.run_full import run_full_pipeline
 from config import settings as cfg
+
 
 
 def run_train(baseline):
@@ -38,6 +47,8 @@ def main():
     print("3. Backtest only")
     print("4. Live trading")
     print("5. Optimize")
+    print("6. Generate Dashboard DB")
+    print("7. Dashboard Report")
 
     choice = input("Select option: ")
 
@@ -54,6 +65,13 @@ def main():
     elif choice == "5":
         print("Running optimization...")
         run_optimization(n_trials=cfg.OPTIMIZATION_TRIALS)
+    elif choice == "6":
+        generate_db_file()
+    elif choice == "7":
+        report_path = generate_dashboard()
+        webbrowser.open(report_path)
+
+
     else:
         print("Invalid choice")
 
