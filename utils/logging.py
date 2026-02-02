@@ -56,7 +56,8 @@ def log_margin_state(prefix: str, direction: int, required_margin: float):
     # )
 
 
-CSV_LOG_PATH = "logs/live_trading.csv"
+TRADES_CSV_LOG_PATH = "logs/trades_log.csv"
+LOW_LOGS_CSV_LOG_PATH = "logs/low_conf.csv"
 
 
 def log_csv(event_type: str, **kwargs):
@@ -66,7 +67,7 @@ def log_csv(event_type: str, **kwargs):
     """
 
     # Ensure directory exists
-    os.makedirs(os.path.dirname(CSV_LOG_PATH), exist_ok=True)
+    os.makedirs(os.path.dirname(TRADES_CSV_LOG_PATH), exist_ok=True)
 
     # Prepare row
     ts = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
@@ -74,13 +75,34 @@ def log_csv(event_type: str, **kwargs):
     row.update(kwargs)
 
     # Write header if file doesn't exist
-    write_header = not os.path.exists(CSV_LOG_PATH)
+    write_header = not os.path.exists(TRADES_CSV_LOG_PATH)
 
-    with open(CSV_LOG_PATH, "a", newline="", encoding="utf-8") as f:
+    with open(TRADES_CSV_LOG_PATH, "a", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=row.keys())
         if write_header:
             writer.writeheader()
         writer.writerow(row)
 
-    # Also print to console for live debugging
-    # print(row)
+
+def low_conf_log_csv(event_type: str, **kwargs):
+    """
+    event_type: e.g. 'NO_TRADE', 'OPEN', 'BLOCKED', 'MARGIN', etc.
+    kwargs: any additional fields you want to log
+    """
+
+    # Ensure directory exists
+    os.makedirs(os.path.dirname(LOW_LOGS_CSV_LOG_PATH), exist_ok=True)
+
+    # Prepare row
+    ts = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    row = {"timestamp": ts, "event": event_type}
+    row.update(kwargs)
+
+    # Write header if file doesn't exist
+    write_header = not os.path.exists(LOW_LOGS_CSV_LOG_PATH)
+
+    with open(LOW_LOGS_CSV_LOG_PATH, "a", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=row.keys())
+        if write_header:
+            writer.writeheader()
+        writer.writerow(row)

@@ -10,7 +10,7 @@ from live.mt5_client import init_mt5, get_mt5_rates, get_bars
 from models.registry import generate_signals  # your existing function
 from models.live_loader import load_live_model
 from execution.broker import open_position, close_all_if_needed  # you’ll wire these
-from utils.logging import log_event, log_margin_state, log_csv  # simple logger
+from utils.logging import log_event, log_margin_state, log_csv, low_conf_log_csv  # simple logger
 from execution.margin import compute_required_margin, margin_allowed
 
 
@@ -62,7 +62,7 @@ def live_trading_loop():
         # Filters (use baseline params)
         if last_conf < cfg.CONF_THRESHOLD:
             # log_event(f"{last_idx} | No trade: low confidence {last_conf:.3f}")
-            log_csv(
+            low_conf_log_csv(
                 "NO_TRADE_LOW_CONF",
                 bar_time=str(last_idx),
                 confidence=last_conf,
@@ -72,7 +72,7 @@ def live_trading_loop():
 
         if last_atr_norm < cfg.ATR_NORM_THRESHOLD:
             # log_event(f"{last_idx} | No trade: low ATR_norm {last_atr_norm:.6f}")
-            log_csv(
+            low_conf_log_csv(
                 "NO_TRADE_LOW_ATR",
                 bar_time=str(last_idx),
                 atr_norm=last_atr_norm,
@@ -84,7 +84,7 @@ def live_trading_loop():
         direction = last_pred
         if direction == 0:
             # log_event(f"{last_idx} | No trade: neutral signal")
-            log_csv(
+            low_conf_log_csv(
                 "NO_TRADE_NEUTRAL",
                 bar_time=str(last_idx),
             )
@@ -99,7 +99,7 @@ def live_trading_loop():
 
         if required_margin is None:
             # log_event(f"{last_idx} | Cannot compute margin — skipping trade")
-            log_csv(
+            low_conf_log_csv(
                 "CAN_NOT_COMPUTE_MARGIN",
                 bar_time=str(last_idx),
             )
@@ -112,7 +112,7 @@ def live_trading_loop():
             #     f"{last_idx} | Trade blocked: required margin {required_margin:.2f} "
             #     f"exceeds allowed {cfg.MARGIN_LIMIT * 100:.0f}% of equity"
             # )
-            log_csv(
+            low_conf_log_csv(
                 "TRADE_BLOCKED_MARGIN",
                 bar_time=str(last_idx),
                 direction="LONG" if direction == 1 else "SHORT",
