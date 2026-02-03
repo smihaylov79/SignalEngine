@@ -9,9 +9,10 @@ from features.pipeline import build_features
 from live.mt5_client import init_mt5, get_mt5_rates, get_bars
 from models.registry import generate_signals  # your existing function
 from models.live_loader import load_live_model
-from execution.broker import open_position, close_all_if_needed  # you’ll wire these
+from execution.broker import open_position, close_all_if_needed, check_open_positions  # you’ll wire these
 from utils.logging import log_event, log_margin_state, log_csv, low_conf_log_csv  # simple logger
 from execution.margin import compute_required_margin, margin_allowed
+from utils.sleeping import sleep_until_next_bar
 
 
 def get_lookback_start(now: datetime, bars: int = 300):
@@ -27,6 +28,7 @@ def live_trading_loop():
     last_bar_time = None
 
     while True:
+        sleep_until_next_bar(5)
         # now = datetime.utcnow()
         # lookback_start = get_lookback_start(now)
         #
@@ -35,14 +37,14 @@ def live_trading_loop():
         df_raw = get_bars(cfg.SYMBOL, cfg.TIMEFRAME, n=300)
 
         if df_raw is None or df_raw.empty:
-            time.sleep(5)
+            # time.sleep(300)
             continue
 
         current_bar_time = df_raw.index[-1]
 
         # Only act once per new M5 bar
         if current_bar_time == last_bar_time:
-            time.sleep(5)
+            # time.sleep(300)
             continue
 
         last_bar_time = current_bar_time
@@ -50,14 +52,19 @@ def live_trading_loop():
         # Build features and generate signals on full window
         df_feat, preds, conf = generate_signals(model, df_raw, feature_cols)
 
+
         # Use last bar only
         last_idx = df_feat.index[-1]
         last_conf = conf[-1]
         last_pred = preds[-1]  # already decoded to -1, 0, 1
         last_atr_norm = df_feat["atr_norm"].iloc[-1]
 
+        print(f'{last_idx} | {last_pred} | {last_conf}')
+
+        check_open_positions(last_pred, last_idx)
+
         # Safety: close all if margin / risk breached
-        close_all_if_needed()
+        # close_all_if_needed()
 
         # Filters (use baseline params)
         if last_conf < cfg.CONF_THRESHOLD:
@@ -152,4 +159,4 @@ def live_trading_loop():
         )
 
         # Small sleep to avoid hammering MT5
-        time.sleep(5)
+        # time.sleep(300)

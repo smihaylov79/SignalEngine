@@ -86,7 +86,8 @@ def get_bars(symbol: str, timeframe: str, n: int = 500) -> pd.DataFrame:
     df.set_index("time", inplace=True)
 
     # Convert to local timezone (your existing logic)
-    df.index = df.index.tz_localize("UTC").tz_convert(LOCAL_TZ)
+    # df.index = df.index.tz_localize("UTC").tz_convert(LOCAL_TZ)
+    df.index = df.index.tz_localize(LOCAL_TZ)
 
     return df[["open", "high", "low", "close"]]
 
