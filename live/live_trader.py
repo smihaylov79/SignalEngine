@@ -59,7 +59,7 @@ def live_trading_loop():
         last_pred = preds[-1]  # already decoded to -1, 0, 1
         last_atr_norm = df_feat["atr_norm"].iloc[-1]
 
-        print(f'{last_idx} | {last_pred} | {last_conf}')
+        print(f'{last_idx} | {last_pred} | {last_conf} | {last_atr_norm}')
 
         check_open_positions(last_pred, last_idx)
 
